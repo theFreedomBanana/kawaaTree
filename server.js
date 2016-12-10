@@ -16,7 +16,7 @@ app.post('/tropo', (req, res) => {
   res.send("it works");
 });
 
-app.get('/tropo', (req, res) => {
+app.get('/tropo', (request, response) => {
   console.log("GET request");
   pg.connect(process.env.DATABASE_URL, function(err, client, done) {
     client.query('SELECT * FROM user', function(err, result) {
