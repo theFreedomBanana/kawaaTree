@@ -17,7 +17,7 @@ app.post('/tropo', (req, res) => {
 
 app.get('/tropo', (req, res) => {
   console.log("GET request");
-  pg.query('SELECT * FROM users', (err, res) => {
+  db.query('SELECT * FROM users', (err, res) => {
     res.json(res);
   });
   //res.status(200).send("it twerks").end();
