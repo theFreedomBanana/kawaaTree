@@ -18,9 +18,9 @@ app.get('/tropo', (req, res) => {
 
     client
       .query('SELECT * FROM users;')
-      .on('row', function(row) {
-        console.log(JSON.stringify(row));
-        res.render('pages/db', {results: result.rows} );
+      .on('row', (row) => {
+        var result = JSON.stringify(row);
+        res.render('pages/db', {results: result} );
       });
 
   });
