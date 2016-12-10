@@ -14,4 +14,4 @@ app.get('/tropo', (req, res) => {
   res.status(200).send("it twerks").end();
 });
 
-app.listen(5000);
+app.listen(process.env.PORT || 5000);
