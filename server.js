@@ -17,8 +17,9 @@ app.post('/tropo', (req, res) => {
 
 app.get('/tropo', (req, res) => {
   console.log("GET request");
-  db.query('SELECT * FROM users', (err, res) => {
-    res.json(res);
+  db.query('SELECT * FROM users', (err, result) => {
+    console.log(result);
+    res.json(result).end();
   });
   //res.status(200).send("it twerks").end();
 });
