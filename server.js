@@ -26,7 +26,7 @@ app.post('/tropo', (req, res) => {
 app.get('/tropo', (req, res) => {
   console.log("GET request")
   console.log("req", req);
-  res.status(200).send("it twerks");
+  res.status(200).send("it twerks").end();
 });
 
 app.listen(8080);
