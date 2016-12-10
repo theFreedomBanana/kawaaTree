@@ -1,7 +1,9 @@
 var express = require('express'),
     querystring = require('querystring'),
     app = express(),
-    pg = require('pg').Client();
+    pg = require('pg');
+
+var db = new pg.Client();
 
 pg.connect(process.env.DATABASE_URL, err => {
   if (err)
