@@ -3,13 +3,13 @@ var express = require('express'),
     app = express(),
     pg = require('pg');
 
-var db = new pg.Client();
+//var db = new pg.Client();
 
-db.connect(process.env.DATABASE_URL, (err, client, done) => {
-  if (err)
-    throw err;
-  done();
-});
+//db.connect(process.env.DATABASE_URL, (err, client, done) => {
+//  if (err)
+//    throw err;
+//  done();
+//});
 
 app.post('/tropo', (req, res) => {
   console.log("POST request")
@@ -18,9 +18,18 @@ app.post('/tropo', (req, res) => {
 
 app.get('/tropo', (req, res) => {
   console.log("GET request");
-  db.query('SELECT * FROM users', (err, result) => {
-    console.log(result);
-    res.json(result).end();
+  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+    client.query('SELECT * FROM user', function(err, result) {
+      done();
+      if (err) { 
+        console.error(err); 
+        response.send("Error " + err);  
+      }
+      else { 
+        response.render('pages/db', {results: result.rows} );
+      }
+    });
+
   });
   //res.status(200).send("it twerks").end();
 });
