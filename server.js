@@ -20,7 +20,7 @@ app.get('/tropo', (req, res) => {
       .query('SELECT * FROM users;')
       .on('row', (row) => {
         var result = JSON.stringify(row);
-        res.render('pages/db', {results: result} );
+        res.json(result).end();
       });
 
   });
