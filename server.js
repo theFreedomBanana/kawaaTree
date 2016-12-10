@@ -5,7 +5,7 @@ var express = require('express'),
 
 var db = new pg.Client();
 
-pg.connect(process.env.DATABASE_URL, err => {
+db.connect(process.env.DATABASE_URL, err => {
   if (err)
     throw err;
 });
