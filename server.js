@@ -3,7 +3,6 @@ var express = require('express'),
     app = express(),
     pg = require('pg');
 
-pg.defaults.ssl = true;
 
 app.post('/tropo', (req, res) => {
   console.log("POST request")
@@ -12,6 +11,7 @@ app.post('/tropo', (req, res) => {
 });
 
 app.get('/tropo', (req, res) => {
+  pg.defaults.ssl = true;
   pg.connect(process.env.DATABASE_URL, function(err, client) {
     if (err) throw err;
     console.log('Connected to postgres! Getting schemas...');
