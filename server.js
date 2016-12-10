@@ -5,9 +5,10 @@ var express = require('express'),
 
 var db = new pg.Client();
 
-db.connect(process.env.DATABASE_URL, err => {
+db.connect(process.env.DATABASE_URL, (err, client, done) => {
   if (err)
     throw err;
+  done();
 });
 
 app.post('/tropo', (req, res) => {
