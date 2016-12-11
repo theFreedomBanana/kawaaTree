@@ -4,7 +4,7 @@ var express = require('express'),
   app = express(),
   pg = require('pg');
 
-const connectionString = 'postgres://postgres@10.238.29.166:5432/vertKawaaDb';
+const connectionString = process.env.DATABASE_URL || 'postgres://postgres@10.238.29.166:5432/vertKawaaDb';
 
 app.use(bodyParser());
 var client = new pg.Client(connectionString); 
@@ -21,6 +21,8 @@ function isNewUser(number) {
   return client.query("select * from users where phonenumber='" + number + "';").then(data => {
     if (data.rows.length == 0) {
       client.query(`insert into users(phonenumber) values (${number})`);
+      const session = create_session(number);
+      session['missing_name'] = true;
       return true;
     }
     return false;
@@ -28,30 +30,47 @@ function isNewUser(number) {
 }
 
 function create_session(phonenumber) {
-  
+  const session = { phonenumber: phonenumber, firstname_missing: true }
+  sessions.push(session);
+  return session;
 }
 
-function find_session() {
-  
+function find_session(phonenumber) {
+  console.log(sessions)
+  return sessions.find(s => s.phonenumber == phonenumber);
 }
 
-var sessions = []; // { phonenumber: string, first_name: string, last_name: string }
+var sessions = []; // { phonenumber: string, context: string }
 
 // Receiving HTTP requests
 // -----------------------
 app.post('/tropo', (req, res) => {
 
   console.log("POST request");
-  if (req.body.text == 'adopter') {
-    isNewUser(req.body.phonenumber).then(newUser => {
-      if (newUser) {
-        res.send(JSON.stringify({"question": "Quel est ton prénom ?"})).end();
-      }
-      else {
-        res.send(JSON.stringify({"question": 'Quel est le numéro de ton arbre ?'})).end();
-      }
-    });
-  }
+  console.log(req.body);
+  const message = req.body.text;
+  const num = req.body.phonenumber;
+  const session = find_session(num);
+  console.log(session)
+    if (!session) {
+      console.log('newUser');
+      create_session(num);
+      res.send(JSON.stringify({"question": "Quel est ton prénom ?"})).end();
+    }
+    else if (session.firstname_missing) {
+      console.log('askedName');
+      session.firstname_missing = false;
+      session.firstname = message;
+      session.tree_missing = true;
+      res.send(JSON.stringify({"question": 'Merci ' + session.firstname  + '! Quel est le numéro de ton arbre ?'})).end();
+    }
+    else if (session.tree_missing) {
+      console.log('askedTree');
+      session.tree_missing = false;
+      session.tree = message;
+      client.query(`insert into users(phone_number, first_name, tree_id) values (${session.phonenumber}, ${session.firstname}, ${session.tree})`);
+      res.send(JSON.stringify({"question": "Ton arbre est bien " + message})).end();
+    }
 });
 
 app.get('/tropo', (req, res) => {
