@@ -68,7 +68,8 @@ app.post('/tropo', (req, res) => {
       console.log('askedTree');
       session.tree_missing = false;
       session.tree = message;
-      client.query(`insert into users(phone_number, first_name, tree_id) values (${session.phonenumber}, ${session.firstname}, ${session.tree})`);
+      const q = "insert into users(phone_number, first_name, tree_id) values (" + session.phonenumber + "," + session.firstname + "," + session.tree + ")";
+      client.query(q);
       res.send(JSON.stringify({"question": "Ton arbre est bien " + message})).end();
     }
 });
