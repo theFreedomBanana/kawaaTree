@@ -4,7 +4,7 @@ var express = require('express'),
   app = express(),
   pg = require('pg');
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres@10.238.29.166:5432/vertKawaaDb';
+const connectionString = 'postgres://postgres@10.238.29.166:5432/vertKawaaDb';
 
 app.use(bodyParser());
 var client = new pg.Client(connectionString); 
@@ -30,7 +30,14 @@ function isNewUser(number) {
 }
 
 function create_session(phonenumber) {
-  const session = { phonenumber: phonenumber, firstname_missing: true }
+  const session = { 
+    phonenumber: phonenumber, 
+    firstname_missing: true, 
+    lastname_missing: true, 
+    tree_id_missing: true, 
+    tree_name_missing: true,
+    idle: true
+  };
   sessions.push(session);
   return session;
 }
@@ -47,7 +54,6 @@ var sessions = []; // { phonenumber: string, context: string }
 app.post('/tropo', (req, res) => {
 
   console.log("POST request");
-  console.log(req.body);
   const message = req.body.text;
   const num = req.body.phonenumber;
   const session = find_session(num);
@@ -55,22 +61,35 @@ app.post('/tropo', (req, res) => {
     if (!session) {
       console.log('newUser');
       create_session(num);
-      res.send(JSON.stringify({"question": "Quel est ton prénom ?"})).end();
+      res.send(JSON.stringify({"question": "Bonjour, nous sommes content de vous compter parmi nous ! Pouvez-vous nous communiquer le numéro de l'arbre ?"})).end();
+    }
+    else if (session.tree_id_missing) {
+      console.log('askedTreeId');
+      session.tree_id_missing = false;
+      session.tree_id = message;
+      res.send(JSON.stringify({"question": "Merci bcp ! Vous pouvez proposer un nom de cet arbre."})).end();
+    }
+    else if (session.tree_name_missing) {
+      console.log('askedTreeName');
+      session.tree_name_missing = false;
+      session.tree_name = message;
+      res.send(JSON.stringify({"question": "Super ! Et en fait comment vous appelez-vous ?"})).end();
     }
     else if (session.firstname_missing) {
       console.log('askedName');
       session.firstname_missing = false;
-      session.firstname = message;
-      session.tree_missing = true;
-      res.send(JSON.stringify({"question": 'Merci ' + session.firstname  + '! Quel est le numéro de ton arbre ?'})).end();
-    }
-    else if (session.tree_missing) {
-      console.log('askedTree');
-      session.tree_missing = false;
-      session.tree = message;
+      const [ first_name, last_name ] = message.split(' ');
+      session.firstname = first_name;
+      res.send(JSON.stringify({"question": 'Génial ' + session.firstname  + ' ! Nous vous tiendrons au courant des prochaines rencontres et des actions liées à ' + session.tree_name + '. Bonne journée !'})).end();
       const q = "INSERT INTO users (phone_number, first_name, tree_id) VALUES (" + session.phonenumber + ",'" + session.firstname + "'," + session.tree + ")";
       client.query(q);
-      res.send(JSON.stringify({"question": "Ton arbre est bien " + message})).end();
+    }
+    else if (session.idle) {
+      session.idle = false;
+      res.send(JSON.stringify({"question": "Pour plus d'info vous contacter ..."})).end();
+    }
+    else {
+      res.send(JSON.stringify({"question": "Merci et à bientôt !"})).end();
     }
 });
 
