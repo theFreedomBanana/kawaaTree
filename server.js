@@ -45,7 +45,7 @@ var sessions = []; // { phonenumber: string, context: string }
 // Receiving HTTP requests
 // -----------------------
 app.post('/tropo', (req, res) => {
-  client.query("INSERT INTO users (phone_number, first_name) VALUES (1212121212, bobo)")
+  client.query("INSERT INTO users (phone_number, first_name) VALUES (1212121212, 'bobo')")
 
   console.log("POST request");
   console.log(req.body);
